@@ -2,6 +2,7 @@
 // This is the main entry point of our application
 const { ApolloServer } = require('apollo-server-express');
 const express = require('express');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const db = require('./db');
@@ -18,6 +19,15 @@ let notes = [
     { id: '3', content: 'Oh hey look, another note', author: 'Lily' },
 ];
 
+const getUser = token => {
+    if (token) {
+        try {
+            return jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            throw new Error('Session Invalid');
+        }
+    }
+}
 
 const app = express();
 
@@ -28,8 +38,11 @@ app.get('/', (req, res) => res.send('Hello Worldssss!!!!!!!'));
 const server = new ApolloServer({ 
     typeDefs, 
     resolvers,
-    context: () => {
-        return { models };
+    context: ({ req }) => {
+        const token = req.headers.authorization;
+        const user = getUser(token);
+        console.log(user);
+        return { models, user };
     }
 });
 
