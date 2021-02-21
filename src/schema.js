@@ -11,9 +11,15 @@ module.exports = gql`
         favoriteCount: Int!
         favoritedBy: [User!]
     }
+    type NoteFeed {
+        notes: [Note]!
+        cursor: String!
+        hasNextPage: Boolean!
+    }
     type Query {
         hello: String!
         notes: [Note!]!
+        noteFeed(cursor: String): NoteFeed
         note(id: ID!): Note!
         user(username: String!): User
         users: [User!]!

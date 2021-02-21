@@ -1,8 +1,12 @@
 // index.js
 // This is the main entry point of our application
+const depthLimit = require('graphql-depth-limit');
+const { createComplexityLimitRule } = require('graphql-validation-complexity');
 const { ApolloServer } = require('apollo-server-express');
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const cors = require('cors');
 require('dotenv').config();
 
 const db = require('./db');
@@ -30,6 +34,8 @@ const getUser = token => {
 }
 
 const app = express();
+app.use(helmet());
+app.use(cors());
 
 db.connect(DB_HOST);
 
@@ -38,6 +44,7 @@ app.get('/', (req, res) => res.send('Hello Worldssss!!!!!!!'));
 const server = new ApolloServer({ 
     typeDefs, 
     resolvers,
+    validationRules: [depthLimit(5), createComplexityLimitRule(1000)],
     context: ({ req }) => {
         const token = req.headers.authorization;
         const user = getUser(token);
